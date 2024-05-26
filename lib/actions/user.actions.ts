@@ -23,4 +23,4 @@ export async function getLoggedInUser() {
     } catch (error) {
         return null 
     }
-}
+}git push -u origin main
