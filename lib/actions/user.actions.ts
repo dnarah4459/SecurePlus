@@ -1,25 +1,68 @@
 "use server";
-///Going to be usnig appwrite for this
-export const signIn = async () => {
-  try {
-    //Mutations / Database / Make fetch
-  } catch (error) {}
+
+import { createAdminClient, createSessionClient } from "../appwrite";
+import { ID } from "node-appwrite";
+import { cookies } from "next/headers";
+import { parseStringify } from "../utils";
+
+export const signIn = async ({email, password}: signInProps) => {
+  try {    
+    const { account } = await createAdminClient();
+    const response = await account.createEmailPasswordSession(email, password);
+    return parseStringify(response)
+  } catch (error) {
+    console.error("Error", error);
+  }
 };
 
 export const signUp = async (userData: SignUpParams) => {
+  const { email, password, firstName, lastName } = userData;
+
   try {
-    //Mutations / Database / Make fetch
-  } catch (error) {}
+    //createAmdminClient function basically is like a portal to our Appwrite database. With createAdminClient, we can get access to our appwrite project and databases
+    const { account } = await createAdminClient();
+    const newUserAccount = await account.create(
+      ID.unique(),
+      email,
+      password,
+      `${firstName} ${lastName}`
+    );
+
+    const session = await account.createEmailPasswordSession(email, password);
+
+    cookies().set("appwrite-session", session.secret, {
+      path: "/",
+      httpOnly: true,
+      sameSite: "strict",
+      secure: true,
+    });
+
+    return parseStringify(newUserAccount)
+  } catch (error) {
+    console.error("Error", error);
+  }
+
+
+
 };
 
-
-
 export async function getLoggedInUser() {
-    try {
-        return await account.get(); 
+  try {
+    const { account } = await createSessionClient();
+    return await account.get();
+  } catch (error) {
+    return null;
+  }
+}
 
-    
-    } catch (error) {
-        return null 
-    }
-}git push -u origin main
+
+
+export const logoutAccount = async () => {
+  try {
+    const { account } = await createSessionClient(); 
+    cookies().delete('appwrite-session'); 
+    await account.deleteSession('current '); 
+  } catch (error) {
+    return null; 
+  }
+}

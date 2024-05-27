@@ -2,10 +2,11 @@ import React from "react";
 import Sidebar from "@/components/Sidebar";
 import Image from "next/image";
 import MobileNavbar from "@/components/MobileNavbar";
+import { getLoggedInUser } from "../../../lib/actions/user.actions";
 
-const RootLayout = ({ children }: { children: React.ReactNode }) => {
+const RootLayout = async ({ children }: { children: React.ReactNode }) => {
     ///This bascialy represents a dummy test user 
-  const loggedIn = { firstName: "Adrin", lastName: "JSM" };
+  const loggedIn = await getLoggedInUser()
   return (
     ///As you can see here, we are applying the inter font for all the pages that include the a sidebar and left sidebar. We define the --font-inter font in the main layout page
     <main className="flex h-screen w-full font-inter ">
